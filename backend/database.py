@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncI
 from typing import Optional, List, Dict, Any
 import os
 import logging
-from .models import User, Movie, Series, Sports, WatchlistItem
+from models import User, Movie, Series, Sports, WatchlistItem
 
 logger = logging.getLogger(__name__)
 
