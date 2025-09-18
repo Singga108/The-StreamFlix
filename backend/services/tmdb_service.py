@@ -1,0 +1,196 @@
+import aiohttp
+import asyncio
+from typing import List, Dict, Any, Optional
+import logging
+from ..models import Movie, Series
+
+logger = logging.getLogger(__name__)
+
+class TMDBService:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = "https://api.themoviedb.org/3"
+        self.image_base_url = "https://image.tmdb.org/t/p/w500"
+        self.backdrop_base_url = "https://image.tmdb.org/t/p/w1280"
+        
+    async def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Make HTTP request to TMDB API"""
+        if params is None:
+            params = {}
+        
+        params['api_key'] = self.api_key
+        url = f"{self.base_url}/{endpoint}"
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        logger.error(f"TMDB API error: {response.status}")
+                        return {}
+        except Exception as e:
+            logger.error(f"TMDB request failed: {str(e)}")
+            return {}
+    
+    def _transform_movie(self, tmdb_movie: Dict[str, Any]) -> Movie:
+        """Transform TMDB movie data to our Movie model"""
+        genres = [genre['name'] for genre in tmdb_movie.get('genres', [])]
+        if not genres:
+            # If detailed genres not available, use genre_ids mapping
+            genre_mapping = {
+                28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+                80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+                14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+                9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+                10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+            }
+            genres = [genre_mapping.get(gid, "Unknown") for gid in tmdb_movie.get('genre_ids', [])]
+        
+        thumbnail = f"{self.image_base_url}{tmdb_movie.get('poster_path', '')}" if tmdb_movie.get('poster_path') else ""
+        backdrop = f"{self.backdrop_base_url}{tmdb_movie.get('backdrop_path', '')}" if tmdb_movie.get('backdrop_path') else ""
+        
+        return Movie(
+            tmdb_id=tmdb_movie.get('id'),
+            title=tmdb_movie.get('title', 'Unknown Title'),
+            description=tmdb_movie.get('overview', 'No description available'),
+            genre=genres,
+            rating=tmdb_movie.get('vote_average', 0.0),
+            year=int(tmdb_movie.get('release_date', '2023-01-01')[:4]) if tmdb_movie.get('release_date') else 2023,
+            thumbnail=thumbnail,
+            backdrop_image=backdrop,
+            categories=["popular"],
+            duration=f"{tmdb_movie.get('runtime', 120)} min" if tmdb_movie.get('runtime') else "120 min",
+            popularity=tmdb_movie.get('popularity', 0.0)
+        )
+    
+    def _transform_series(self, tmdb_series: Dict[str, Any]) -> Series:
+        """Transform TMDB series data to our Series model"""
+        genres = [genre['name'] for genre in tmdb_series.get('genres', [])]
+        if not genres:
+            genre_mapping = {
+                10759: "Action & Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+                99: "Documentary", 18: "Drama", 10751: "Family", 10762: "Kids",
+                9648: "Mystery", 10763: "News", 10764: "Reality", 10765: "Sci-Fi & Fantasy",
+                10766: "Soap", 10767: "Talk", 10768: "War & Politics", 37: "Western"
+            }
+            genres = [genre_mapping.get(gid, "Unknown") for gid in tmdb_series.get('genre_ids', [])]
+        
+        thumbnail = f"{self.image_base_url}{tmdb_series.get('poster_path', '')}" if tmdb_series.get('poster_path') else ""
+        backdrop = f"{self.backdrop_base_url}{tmdb_series.get('backdrop_path', '')}" if tmdb_series.get('backdrop_path') else ""
+        
+        return Series(
+            tmdb_id=tmdb_series.get('id'),
+            title=tmdb_series.get('name', 'Unknown Title'),
+            description=tmdb_series.get('overview', 'No description available'),
+            genre=genres,
+            rating=tmdb_series.get('vote_average', 0.0),
+            year=int(tmdb_series.get('first_air_date', '2023-01-01')[:4]) if tmdb_series.get('first_air_date') else 2023,
+            thumbnail=thumbnail,
+            backdrop_image=backdrop,
+            categories=["series"],
+            seasons=tmdb_series.get('number_of_seasons', 1),
+            episodes=tmdb_series.get('number_of_episodes', 10)
+        )
+    
+    async def get_trending_movies(self, page: int = 1) -> List[Movie]:
+        """Get trending movies"""
+        data = await self._make_request(f"trending/movie/week", {"page": page})
+        movies = []
+        
+        for movie_data in data.get('results', []):
+            try:
+                movie = self._transform_movie(movie_data)
+                movie.categories = ["trending"]
+                movies.append(movie)
+            except Exception as e:
+                logger.error(f"Error transforming movie: {str(e)}")
+                continue
+                
+        return movies
+    
+    async def get_popular_movies(self, page: int = 1) -> List[Movie]:
+        """Get popular movies"""
+        data = await self._make_request(f"movie/popular", {"page": page})
+        movies = []
+        
+        for movie_data in data.get('results', []):
+            try:
+                movie = self._transform_movie(movie_data)
+                movie.categories = ["popular"]
+                movies.append(movie)
+            except Exception as e:
+                logger.error(f"Error transforming movie: {str(e)}")
+                continue
+                
+        return movies
+    
+    async def get_trending_series(self, page: int = 1) -> List[Series]:
+        """Get trending TV series"""
+        data = await self._make_request(f"trending/tv/week", {"page": page})
+        series_list = []
+        
+        for series_data in data.get('results', []):
+            try:
+                series = self._transform_series(series_data)
+                series.categories = ["series"]
+                series_list.append(series)
+            except Exception as e:
+                logger.error(f"Error transforming series: {str(e)}")
+                continue
+                
+        return series_list
+    
+    async def search_content(self, query: str, page: int = 1) -> tuple[List[Movie], List[Series]]:
+        """Search movies and TV shows"""
+        # Search movies
+        movies_data = await self._make_request("search/movie", {"query": query, "page": page})
+        movies = []
+        
+        for movie_data in movies_data.get('results', []):
+            try:
+                movie = self._transform_movie(movie_data)
+                movies.append(movie)
+            except Exception as e:
+                logger.error(f"Error transforming search movie: {str(e)}")
+                continue
+        
+        # Search TV shows
+        series_data = await self._make_request("search/tv", {"query": query, "page": page})
+        series_list = []
+        
+        for series_data_item in series_data.get('results', []):
+            try:
+                series = self._transform_series(series_data_item)
+                series_list.append(series)
+            except Exception as e:
+                logger.error(f"Error transforming search series: {str(e)}")
+                continue
+        
+        return movies, series_list
+    
+    async def get_movie_details(self, movie_id: int) -> Optional[Movie]:
+        """Get detailed movie information"""
+        data = await self._make_request(f"movie/{movie_id}")
+        
+        if not data:
+            return None
+            
+        try:
+            return self._transform_movie(data)
+        except Exception as e:
+            logger.error(f"Error transforming movie details: {str(e)}")
+            return None
+    
+    async def get_series_details(self, series_id: int) -> Optional[Series]:
+        """Get detailed series information"""
+        data = await self._make_request(f"tv/{series_id}")
+        
+        if not data:
+            return None
+            
+        try:
+            return self._transform_series(data)
+        except Exception as e:
+            logger.error(f"Error transforming series details: {str(e)}")
+            return None
