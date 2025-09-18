@@ -125,8 +125,8 @@ const ContentCarousel = ({ title, items, type = 'movie' }) => {
                     {type === 'sports' ? (
                       <div className="space-y-1">
                         <p className="text-sm text-gray-400">{item.sport}</p>
-                        <p className="text-xs text-gray-500">{item.time}</p>
-                        <p className="text-xs text-gray-500">{item.venue}</p>
+                        <p className="text-xs text-gray-500">{item.time || 'Time TBD'}</p>
+                        <p className="text-xs text-gray-500">{item.venue || 'Venue TBD'}</p>
                       </div>
                     ) : (
                       <div className="space-y-1">
@@ -134,11 +134,18 @@ const ContentCarousel = ({ title, items, type = 'movie' }) => {
                           <span className="text-sm text-gray-400">{item.year}</span>
                           <div className="flex items-center space-x-1">
                             <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                            <span className="text-sm text-gray-400">{item.rating}</span>
+                            <span className="text-sm text-gray-400">{item.rating?.toFixed(1) || 'N/A'}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-400">{item.genre}</p>
-                        <p className="text-xs text-gray-500">{item.duration}</p>
+                        <p className="text-sm text-gray-400">{
+                          Array.isArray(item.genre) ? item.genre.join(', ') : item.genre || 'Unknown'
+                        }</p>
+                        <p className="text-xs text-gray-500">{
+                          item.duration || 
+                          (item.seasons ? `${item.seasons} Seasons` : '') ||
+                          (item.episodes ? `${item.episodes} Episodes` : '') ||
+                          'Duration unknown'
+                        }</p>
                       </div>
                     )}
                   </CardContent>
