@@ -3,7 +3,11 @@ import jwt
 from datetime import datetime, timedelta
 from typing import Optional
 import os
-from ..models import User, UserCreate, UserLogin, UserResponse
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models import User, UserCreate, UserLogin, UserResponse
 
 class AuthService:
     def __init__(self):
