@@ -2,7 +2,11 @@ import aiohttp
 import asyncio
 from typing import List, Dict, Any, Optional
 import logging
-from ..models import Movie, Series
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models import Movie, Series
 
 logger = logging.getLogger(__name__)
 
