@@ -173,6 +173,19 @@ class TMDBService:
         
         return movies, series_list
     
+    async def get_series_details(self, series_id: int) -> Optional[Series]:
+        """Get detailed series information"""
+        data = await self._make_request(f"tv/{series_id}")
+        
+        if not data:
+            return None
+            
+        try:
+            return self._transform_series(data)
+        except Exception as e:
+            logger.error(f"Error transforming series details: {str(e)}")
+            return None
+    
     async def get_movie_details(self, movie_id: int) -> Optional[Movie]:
         """Get detailed movie information"""
         data = await self._make_request(f"movie/{movie_id}")
