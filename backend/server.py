@@ -179,6 +179,90 @@ async def get_popular_movies(page: int = 1, current_user: Optional[User] = Depen
         logger.error(f"Error fetching popular movies: {str(e)}")
         return await database.get_movies_by_category("popular", 20)
 
+@api_router.get("/movies/hindi", response_model=List[Movie])
+async def get_hindi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get Hindi movies"""
+    try:
+        movies = await tmdb_service.get_hindi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching Hindi movies: {str(e)}")
+        return await database.get_movies_by_category("hindi", 20)
+
+@api_router.get("/movies/hindi/old", response_model=List[Movie])
+async def get_old_hindi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get old Hindi movies"""
+    try:
+        movies = await tmdb_service.get_old_hindi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching old Hindi movies: {str(e)}")
+        return await database.get_movies_by_category("old_hindi", 20)
+
+@api_router.get("/movies/hindi/trending", response_model=List[Movie])
+async def get_trending_hindi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get trending Hindi movies"""
+    try:
+        movies = await tmdb_service.get_trending_hindi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching trending Hindi movies: {str(e)}")
+        return await database.get_movies_by_category("trending_hindi", 20)
+
+@api_router.get("/movies/punjabi", response_model=List[Movie])
+async def get_punjabi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get Punjabi movies"""
+    try:
+        movies = await tmdb_service.get_punjabi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching Punjabi movies: {str(e)}")
+        return await database.get_movies_by_category("punjabi", 20)
+
+@api_router.get("/movies/punjabi/old", response_model=List[Movie])
+async def get_old_punjabi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get old Punjabi movies"""
+    try:
+        movies = await tmdb_service.get_old_punjabi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching old Punjabi movies: {str(e)}")
+        return await database.get_movies_by_category("old_punjabi", 20)
+
+@api_router.get("/movies/punjabi/trending", response_model=List[Movie])
+async def get_trending_punjabi_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get trending Punjabi movies"""
+    try:
+        movies = await tmdb_service.get_trending_punjabi_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching trending Punjabi movies: {str(e)}")
+        return await database.get_movies_by_category("trending_punjabi", 20)
+
+@api_router.get("/movies/anime", response_model=List[Movie])
+async def get_anime_movies(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get anime movies"""
+    try:
+        movies = await tmdb_service.get_anime_movies(page)
+        if movies:
+            await database.save_movies(movies)
+        return movies
+    except Exception as e:
+        logger.error(f"Error fetching anime movies: {str(e)}")
+        return await database.get_movies_by_category("anime", 20)
+
 @api_router.get("/movies/{movie_id}", response_model=Movie)
 async def get_movie_details(movie_id: int, current_user: Optional[User] = Depends(get_current_user_optional)):
     """Get movie details"""
