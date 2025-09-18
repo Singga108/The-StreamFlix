@@ -2,7 +2,11 @@ from typing import List
 import asyncio
 from datetime import datetime, timedelta
 import random
-from ..models import Sports
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models import Sports
 
 class SportsService:
     def __init__(self):
