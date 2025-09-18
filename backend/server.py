@@ -9,15 +9,15 @@ from typing import List, Optional, Annotated
 from datetime import datetime
 
 # Import our models and services
-from .models import (
+from models import (
     Movie, Series, Sports, User, UserCreate, UserLogin, UserResponse, 
     WatchlistAdd, WatchlistItem, SearchRequest, SearchResponse,
     MovieResponse, SeriesResponse, SportsResponse
 )
-from .services.tmdb_service import TMDBService
-from .services.sports_service import SportsService
-from .services.auth_service import AuthService
-from .database import database
+from services.tmdb_service import TMDBService
+from services.sports_service import SportsService
+from services.auth_service import AuthService
+from database import database
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
