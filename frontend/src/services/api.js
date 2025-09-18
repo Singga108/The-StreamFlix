@@ -44,12 +44,20 @@ export const authAPI = {
 export const moviesAPI = {
   getTrending: (page = 1) => api.get(`/movies/trending?page=${page}`),
   getPopular: (page = 1) => api.get(`/movies/popular?page=${page}`),
+  getHindi: (page = 1) => api.get(`/movies/hindi?page=${page}`),
+  getOldHindi: (page = 1) => api.get(`/movies/hindi/old?page=${page}`),
+  getTrendingHindi: (page = 1) => api.get(`/movies/hindi/trending?page=${page}`),
+  getPunjabi: (page = 1) => api.get(`/movies/punjabi?page=${page}`),
+  getOldPunjabi: (page = 1) => api.get(`/movies/punjabi/old?page=${page}`),
+  getTrendingPunjabi: (page = 1) => api.get(`/movies/punjabi/trending?page=${page}`),
+  getAnime: (page = 1) => api.get(`/movies/anime?page=${page}`),
   getDetails: (movieId) => api.get(`/movies/${movieId}`),
 };
 
 // Series APIs
 export const seriesAPI = {
   getTrending: (page = 1) => api.get(`/series/trending?page=${page}`),
+  getWeb: (page = 1) => api.get(`/series/web?page=${page}`),
   getDetails: (seriesId) => api.get(`/series/${seriesId}`),
 };
 
