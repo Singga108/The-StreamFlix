@@ -290,6 +290,18 @@ async def get_trending_series(page: int = 1, current_user: Optional[User] = Depe
         logger.error(f"Error fetching trending series: {str(e)}")
         return await database.get_series_by_category("series", 20)
 
+@api_router.get("/series/web", response_model=List[Series])
+async def get_web_series(page: int = 1, current_user: Optional[User] = Depends(get_current_user_optional)):
+    """Get popular web series"""
+    try:
+        series_list = await tmdb_service.get_web_series(page)
+        if series_list:
+            await database.save_series(series_list)
+        return series_list
+    except Exception as e:
+        logger.error(f"Error fetching web series: {str(e)}")
+        return await database.get_series_by_category("web_series", 20)
+
 @api_router.get("/series/{series_id}", response_model=Series)
 async def get_series_details(series_id: int, current_user: Optional[User] = Depends(get_current_user_optional)):
     """Get series details"""
